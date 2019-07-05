@@ -23,52 +23,35 @@ public class Servlet extends HttpServlet {
 
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
 
-        switch (action) {
-            case "list":
-                // http://localhost:8080/items?action=list
-                try {
-                    resp.getWriter().print(itemController.getAllItems());
-                } catch (RepoAccessEcxeption e) {
-                    resp.setStatus(500);
-                    resp.getWriter().print("Error" + e.getMessage());
-                }
-            case "getById":
-                //  http://localhost:8080/items?action=getById&id=3011
-                try {
-                    resp.getWriter().print(itemController.getItemById(Long.parseLong(req.getParameter("id"))));
-                } catch (ItemExistException e) {
-                    resp.getWriter().print("Item with id " + req.getParameter("id") + " not found");
-                } catch (RepoAccessEcxeption e) {
-                    resp.setStatus(500);
-                    resp.getWriter().print("Error" + e.getMessage());
-                }
-            case "save":
-                doPost(req, resp);
-            case "update":
-                //  http://localhost:8080/items?action=update
-                doPut(req, resp);
-            case "delete":
-                //  http://localhost:8080/items?action=delete&id=3042
-                try {
-                    itemController.deleteItem(Long.parseLong(req.getParameter("id")));
-                    doGet( req, resp);
-                } catch (ItemExistException e) {
-                    resp.getWriter().print("Item with id " + req.getParameter("id") + " not found");
-                } catch (RepoAccessEcxeption e) {
-                    resp.setStatus(500);
-                    resp.getWriter().print("Error" + e.getMessage());
-                }
-            default:
-                try {
-                    resp.getWriter().print(itemController.getAllItems());
-                } catch (RepoAccessEcxeption e) {
-                    resp.setStatus(500);
-                    resp.getWriter().print("Error" + e.getMessage());                }
+
+        if (req.getParameter("id") != null) {
+            //          http://localhost:8080/items?action=getById&id=3011
+            try {
+                resp.getWriter().print(itemController.getItemById(Long.parseLong(req.getParameter("id"))));
+            } catch (ItemExistException e) {
+                resp.getWriter().print("Item with id " + req.getParameter("id") + " not found");
+            } catch (RepoAccessEcxeption e) {
+                resp.setStatus(500);
+                resp.getWriter().print("Error" + e.getMessage());
+            }
+        } else {
+            try {
+                resp.getWriter().print(itemController.getAllItems());
+            } catch (RepoAccessEcxeption e) {
+                resp.setStatus(500);
+                resp.getWriter().print("Error" + e.getMessage());
+            }
         }
     }
 
+    /*
+    "id":"3065",
+    "name":"3065",
+    "dateCreated":"2019-07-02",
+    "lastUpdatedDate":"2019-07-02",
+    "description":"3065"
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         item = mappingItemFromJSONInStringPresentation(req);
@@ -80,11 +63,19 @@ public class Servlet extends HttpServlet {
             resp.getWriter().print("Item with id " + item.getId() + " is not found  in Data Base.");
         } catch (RepoAccessEcxeption e) {
             resp.setStatus(500);
-            resp.getWriter().print("Error" + e.getMessage());        }
+            resp.getWriter().print("Error" + e.getMessage());
+        }
     }
 
+    /*
+    "name":"Olko5333updated",
+    "dateCreated":"2019-07-02",
+    "lastUpdatedDate":"2019-07-02",
+    "description":"TestOlko2updated"
+     */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws
+            ServletException, IOException {
         item = mappingItemFromJSONInStringPresentation(req);
         try {
             itemController.saveItem(item);
@@ -94,7 +85,24 @@ public class Servlet extends HttpServlet {
             resp.getWriter().print("Item with name " + item.getName() + " is already present in Data Base.");
         } catch (RepoAccessEcxeption e) {
             resp.setStatus(500);
-            resp.getWriter().print("Error" + e.getMessage());        }
+            resp.getWriter().print("Error" + e.getMessage());
+        }
+    }
+
+    /*
+http://localhost:8080/items?itemId=3074
+    */
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws
+            ServletException, IOException {
+        try {
+            itemController.deleteItem(Long.parseLong(req.getParameter("itemId")));
+        } catch (ItemExistException e) {
+            resp.getWriter().print("Item with id " + req.getParameter("id") + " not found");
+        } catch (RepoAccessEcxeption e) {
+            resp.setStatus(500);
+            resp.getWriter().print("Error" + e.getMessage());
+        }
     }
 
     private Item mappingItemFromJSONInStringPresentation(HttpServletRequest req) throws IOException {
